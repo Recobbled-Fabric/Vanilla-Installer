@@ -25,7 +25,6 @@ import farn.recobbled.installer.version.LoaderVersion;
 import farn.recobbled.installer.version.RecobbledVersion;
 import farn.recobbled.installer.util.Utils;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,9 +95,8 @@ public class ClientInstaller {
 	}
 
 	private static void createBRCJar(InputStream mc, InputStream brc, Path profileJar) throws IOException {
-		File mcJar = Utils.placeFile(Utils.TEMP.resolve("temp_minecraft.jar"), mc).toFile();
-		File recobbledJar = Utils.placeFile(Utils.TEMP.resolve("temp_recobbled.jar"), brc).toFile();
-		File temp = Utils.TEMP.resolve("temp_combined.jar").toFile();
-		Files.copy(Utils.createModdedMcJar(mcJar, recobbledJar, temp), profileJar, StandardCopyOption.REPLACE_EXISTING);
+		File mcJar = Utils.createTempFile("temp_minecraft.jar", mc);
+		File recobbledJar = Utils.createTempFile("temp_recobbled.jar", brc);
+		Utils.createModdedMcJar(mcJar, recobbledJar, profileJar.toFile());
 	}
 }

@@ -6,12 +6,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.nio.file.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,8 +17,8 @@ import java.util.zip.ZipOutputStream;
 public class Utils {
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-	public static final Path DIR = findDefaultInstallDir().resolve("brc_fabric");
-	public static final Path TEMP = DIR.resolve("temp");
+	public static final Path DIR = mkDir(findDefaultInstallDir().resolve("brc_fabric"));
+	public static final Path TEMP = mkDir(DIR.resolve("temp"));
 
 	public static final ResourceBundle BUNDLE = ResourceBundle.getBundle("lang/installer", Locale.getDefault(), new ResourceBundle.Control() {
 		@Override
@@ -117,14 +112,6 @@ public class Utils {
 		return "TNT"; // Fallback to TNT icon if we cant load Fabric icon.
 	}
 
-	private static MessageDigest sha1Digest() {
-		try {
-			return MessageDigest.getInstance("SHA-1");
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("Something has gone really wrong", e);
-		}
-	}
-
 	public static JsonArray jsonArrayOf(String... strs) {
 		JsonArray args = new JsonArray();
 		for (String str : strs) {
@@ -141,7 +128,7 @@ public class Utils {
 		}
 	}
 
-	public static Path createModdedMcJar(File minecraftJar, File modJar, File output) {
+	public static Path createModdedMcJar(File minecraftJar, File modJar, File output) throws IOException {
 		List<Closeable> closeables = new ArrayList<>();
 
 		ZipOutputStream out;
@@ -219,28 +206,22 @@ public class Utils {
 		}
 	}
 
-	public static Path placeFile(Path file, InputStream stream) {
+	public static File createTempFile(String file, InputStream stream) {
 		try {
-			Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
+			Path tempFile = TEMP.resolve(file);
+			Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+			tempFile.toFile().deleteOnExit();
+			return tempFile.toFile();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return file;
 	}
 
-	public static JsonElement downloadFileAsJson(URL url, Path path) throws IOException {
-		try (InputStream in = url.openStream()) {
-			Files.createDirectories(path.getParent());
-			Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
-			return JsonParser.parseReader(new InputStreamReader(in));
-		} catch (Throwable t) {
-			try {
-				Files.deleteIfExists(path);
-			} catch (Throwable t2) {
-				t.addSuppressed(t2);
-			}
-
-			throw t;
+	private static Path mkDir(Path dir) {
+		try {
+			return Files.createDirectories(dir);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }
