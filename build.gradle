@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id "com.gradleup.shadow" version "9.6.1"
+}
+
+group = 'farn.no.group'
+version = '1.0'
+
+base {
+    archivesName = "RecobbledFabricInstaller"
+}
+
+repositories {
+    maven {
+        name = 'Fabric'
+        url = 'https://maven.fabricmc.net/'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation("com.google.code.gson:gson:2.14.0")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+shadowJar {
+    manifest {
+        attributes 'Implementation-Title': 'RecobbledFabricInstaller',
+                'Implementation-Version': project.version,
+                'Main-Class': 'farn.recobbled.installer.Main'
+    }
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
