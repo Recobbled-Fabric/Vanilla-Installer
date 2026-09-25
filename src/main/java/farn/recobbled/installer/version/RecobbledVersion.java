@@ -24,7 +24,6 @@ public class RecobbledVersion {
     public final URL url;
 
     public static final TreeMap<String, RecobbledVersion> versions = new TreeMap<>();
-    public static int META_VERSION = 0;
 
     private RecobbledVersion(String version, String url) {
         try {
@@ -63,32 +62,16 @@ public class RecobbledVersion {
 
     private static JsonArray getRecobbledMetaJson() throws IOException, URISyntaxException {
         URL MANIFEST_URL = new URI(LinkReference.RECOBBLED_MANIFEST).toURL();
-        Path cached = Utils.DIR.resolve("recobbled_version_v2.json");
-        JsonObject elm = null;
-        boolean needUpdate;
-        if(cached.toFile().exists()) {
-            try {
-                elm = JsonParser.parseString(Utils.readString(cached)).getAsJsonObject();
-                needUpdate = elm.get("meta_version").getAsInt() != META_VERSION;
-            } catch (Exception e) {
-                needUpdate = true;
-            }
-        } else {
-            needUpdate = true;
+        String jsonStr = null;
+
+        try {
+            InputStream in = MANIFEST_URL.openStream();
+            jsonStr = Utils.readString(in);
+        } catch (Exception e) {
+            throw new RuntimeException();
         }
 
-        if(needUpdate) {
-            try {
-                InputStream in = MANIFEST_URL.openStream();
-                String jsonStr = Utils.readString(in);
-                Utils.writeToFile(cached, jsonStr);
-                elm = JsonParser.parseString(jsonStr).getAsJsonObject();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        if(elm != null)
-            return elm.getAsJsonArray("brc_versions");
-        throw  new RuntimeException("No meta version found");
+        JsonObject manifestJson = JsonParser.parseString(jsonStr).getAsJsonObject();
+        return manifestJson.getAsJsonArray("brc_versions");
     }
 }
