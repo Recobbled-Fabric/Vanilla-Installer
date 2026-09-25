@@ -74,6 +74,10 @@ public class Utils {
 	public static String readString(Path path) throws IOException {
 		return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 	}
+	public static String readString(InputStream stream) throws IOException {
+		return new String(readAll(stream), StandardCharsets.UTF_8);
+	}
+
 
 	public static void writeToFile(Path path, String string) throws IOException {
 		Files.write(path, string.getBytes(StandardCharsets.UTF_8));
@@ -225,7 +229,7 @@ public class Utils {
 	}
 
 	public static JsonElement downloadFileAsJson(URL url, Path path) throws IOException {
-		try (InputStream in = openUrl(url)) {
+		try (InputStream in = url.openStream()) {
 			Files.createDirectories(path.getParent());
 			Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 			return JsonParser.parseReader(new InputStreamReader(in));

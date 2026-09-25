@@ -14,6 +14,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 public class RecobbledVersion {
@@ -60,19 +63,26 @@ public class RecobbledVersion {
 
     private static JsonArray getRecobbledMetaJson() throws IOException, URISyntaxException {
         URL MANIFEST_URL = new URI(LinkReference.RECOBBLED_MANIFEST).toURL();
-        File cached = Utils.DIR.resolve("recobbled_version_v2.json").toFile();
+        Path cached = Utils.DIR.resolve("recobbled_version_v2.json");
         JsonObject elm = null;
         boolean needUpdate;
-        if(cached.exists()) {
-            elm = JsonParser.parseString(Utils.readString(cached.toPath())).getAsJsonObject();
-            needUpdate = elm.get("meta_version").getAsInt() != META_VERSION;
+        if(cached.toFile().exists()) {
+            try {
+                elm = JsonParser.parseString(Utils.readString(cached)).getAsJsonObject();
+                needUpdate = elm.get("meta_version").getAsInt() != META_VERSION;
+            } catch (Exception e) {
+                needUpdate = true;
+            }
         } else {
             needUpdate = true;
         }
 
         if(needUpdate) {
             try {
-                elm = Utils.downloadFileAsJson(MANIFEST_URL, cached.toPath()).getAsJsonObject();
+                InputStream in = MANIFEST_URL.openStream();
+                String jsonStr = Utils.readString(in);
+                Utils.writeToFile(cached, jsonStr);
+                elm = JsonParser.parseString(jsonStr).getAsJsonObject();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
