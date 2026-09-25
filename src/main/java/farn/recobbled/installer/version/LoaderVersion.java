@@ -3,6 +3,7 @@ package farn.recobbled.installer.version;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import farn.recobbled.installer.util.LinkReference;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,8 +42,8 @@ public class LoaderVersion {
 
                 libraries = json.getAsJsonObject("libraries").getAsJsonArray("common").deepCopy();
                 JsonObject loaderLib = new JsonObject();
-                loaderLib.addProperty("name", "net.fabricmc:fabric-loader:" + flVer);
-                loaderLib.addProperty("url", "https://maven.fabricmc.net/");
+                loaderLib.addProperty("name", LinkReference.FABRIC_LOADER_ARTIFACT + flVer);
+                loaderLib.addProperty("url", LinkReference.FABRIC_MAVEN);
                 libraries.add(loaderLib);
             } catch (URISyntaxException | IOException e) {
                 throw new RuntimeException(e);
@@ -53,7 +54,7 @@ public class LoaderVersion {
     static {
         try {
             List<LoaderVersion> loaderList = new ArrayList<>();
-            URL fabricMeta = new URI("https://meta.fabricmc.net/v2/versions/loader").toURL();
+            URL fabricMeta = new URI(LinkReference.FABRIC_LOADER_MANIFEST).toURL();
             JsonArray metaJson = JsonParser.parseReader(new InputStreamReader(fabricMeta.openStream())).getAsJsonArray();
             for(int index = 0; index < metaJson.size(); ++index) {
                 JsonObject entry = metaJson.get(index).getAsJsonObject();
@@ -76,7 +77,7 @@ public class LoaderVersion {
 
         String ext = (parts.length == 4) ? parts[3] : "json";
 
-        return String.format("%s%s/%s/%s/%s-%s.%s", "https://maven.fabricmc.net/", groupPath, parts[1], parts[2], parts[1], parts[2], ext);
+        return String.format("%s%s/%s/%s/%s-%s.%s", LinkReference.FABRIC_MAVEN, groupPath, parts[1], parts[2], parts[1], parts[2], ext);
     }
 
     public static LoaderVersion get(String flVer) {

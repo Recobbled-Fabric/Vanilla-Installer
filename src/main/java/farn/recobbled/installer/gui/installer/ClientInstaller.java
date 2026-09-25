@@ -38,7 +38,7 @@ public class ClientInstaller {
 	public static String install(Path mcDir, String brcVersion, LoaderVersion loaderVersion, ClientTab progress) throws IOException {
 		System.out.println("Installing " + brcVersion + " with fabric " + loaderVersion.version);
 
-		String profileName = String.format("%s-%s-%s", "fabric-loader", loaderVersion.version, "brc" + brcVersion);
+		String profileName = String.format("%s-%s-%s", "fabric-loader", loaderVersion.version, "brc-" + brcVersion);
 
 		Path versionsDir = mcDir.resolve("versions");
 		Path profileDir = versionsDir.resolve(profileName);

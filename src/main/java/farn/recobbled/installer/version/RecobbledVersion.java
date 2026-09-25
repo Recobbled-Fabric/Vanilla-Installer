@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import farn.recobbled.installer.util.LinkReference;
 import farn.recobbled.installer.util.Utils;
 
 import java.io.File;
@@ -58,7 +59,7 @@ public class RecobbledVersion {
     }
 
     private static JsonArray getRecobbledMetaJson() throws IOException, URISyntaxException {
-        URL MANIFEST_URL = new URI("https://github.com/Recobbled-Fabric/Vanilla-Installer/raw/refs/heads/resource/recobbled_version_v2.json").toURL();
+        URL MANIFEST_URL = new URI(LinkReference.RECOBBLED_MANIFEST).toURL();
         File cached = Utils.DIR.resolve("recobbled_version_v2.json").toFile();
         JsonObject elm = null;
         boolean needUpdate;
