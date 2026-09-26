@@ -67,11 +67,10 @@ public class InstallerGui extends JFrame {
 	}
 
 	public static void start() throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, XMLStreamException {
-		//This will make people happy
 		String lafCls = UIManager.getSystemLookAndFeelClassName();
 		UIManager.setLookAndFeel(lafCls);
 
-		if (lafCls.endsWith("AquaLookAndFeel")) { // patch osx tab text color bug JDK-8251377
+		if (lafCls.endsWith("AquaLookAndFeel")) {
 			UIManager.put("TabbedPane.foreground", Color.BLACK);
 		}
 

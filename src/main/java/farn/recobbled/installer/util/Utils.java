@@ -3,8 +3,6 @@ package farn.recobbled.installer.util;
 import com.google.gson.*;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.text.DateFormat;
@@ -17,8 +15,6 @@ import java.util.zip.ZipOutputStream;
 public class Utils {
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-	public static final Path DIR = mkDir(findDefaultInstallDir().resolve("brc_fabric"));
-	public static final Path TEMP = mkDir(DIR.resolve("temp"));
 
 	public static final ResourceBundle BUNDLE = ResourceBundle.getBundle("lang/installer", Locale.getDefault(), new ResourceBundle.Control() {
 		@Override
@@ -78,21 +74,6 @@ public class Utils {
 		Files.write(path, string.getBytes(StandardCharsets.UTF_8));
 	}
 
-	private static final int HTTP_TIMEOUT_MS = 8000;
-
-	private static InputStream openUrl(URL url) throws IOException {
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-		conn.setConnectTimeout(HTTP_TIMEOUT_MS);
-		conn.setReadTimeout(HTTP_TIMEOUT_MS);
-		conn.connect();
-
-		int responseCode = conn.getResponseCode();
-		if (responseCode < 200 || responseCode >= 300) throw new IOException("HTTP request to "+url+" failed: "+responseCode);
-
-		return conn.getInputStream();
-	}
-
 	public static String getProfileIcon() {
 		try (InputStream is = Utils.class.getClassLoader().getResourceAsStream("profile_icon.png")) {
 			byte[] ret = new byte[4096];
@@ -128,14 +109,10 @@ public class Utils {
 		}
 	}
 
-	public static Path createModdedMcJar(File minecraftJar, File modJar, File output) throws IOException {
+	public static void combinedJar(File output, File... jars) {
 		List<Closeable> closeables = new ArrayList<>();
 
 		ZipOutputStream out;
-
-		List<File> files = new ArrayList<>();
-		files.add(minecraftJar);
-		files.add(modJar);
 
 		try {
 			out = new ZipOutputStream(Files.newOutputStream(output.toPath()));
@@ -143,8 +120,8 @@ public class Utils {
 
 			Set<String> addedEntries = new HashSet<>();
 
-			for(int i = files.size() - 1; i >= 0; i--) {
-				File file = files.get(i);
+			for(int i = jars.length - 1; i >= 0; i--) {
+				File file = jars[i];
 				ZipFile zip = new ZipFile(file);
 				closeables.add(zip);
 
@@ -177,7 +154,6 @@ public class Utils {
 				}catch (Exception e) {}
 			}
 		}
-		return output.toPath();
 	}
 
 	public static byte[] readAll(InputStream inputStream) throws IOException {
@@ -208,18 +184,12 @@ public class Utils {
 
 	public static File createTempFile(String file, InputStream stream) {
 		try {
-			Path tempFile = TEMP.resolve(file);
+			int suffixStart = file.lastIndexOf('.');
+			String suffix = file.substring(suffixStart);
+			String prefix = file.substring(0, suffixStart);
+			Path tempFile = Files.createTempFile(prefix, suffix);
 			Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
-			tempFile.toFile().deleteOnExit();
 			return tempFile.toFile();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private static Path mkDir(Path dir) {
-		try {
-			return Files.createDirectories(dir);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

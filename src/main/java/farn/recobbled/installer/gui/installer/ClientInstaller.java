@@ -26,12 +26,11 @@ import farn.recobbled.installer.version.RecobbledVersion;
 import farn.recobbled.installer.util.Utils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-
 
 public class ClientInstaller {
 	public static String install(Path mcDir, String brcVersion, LoaderVersion loaderVersion, ClientTab progress) throws IOException {
@@ -52,12 +51,12 @@ public class ClientInstaller {
 
 		Path vanillaJar = versionsDir.resolve("b1.7.3/b1.7.3.jar");
 		if(Files.notExists(vanillaJar)) {
-			throw new IOException("Beta 1.7.3 jar file not found!, Please start Beta 1.7.3 once before installing!");
+			throw new FileNotFoundException("Beta 1.7.3 jar file not found!, Please start Beta 1.7.3 once before installing!");
 		}
 
 		Path vanillaJson = versionsDir.resolve("b1.7.3/b1.7.3.json");
 		if(Files.notExists(vanillaJson)) {
-			throw new IOException("Beta 1.7.3 json file not found!, Please start Beta 1.7.3 once before installing!");
+			throw new FileNotFoundException("Beta 1.7.3 json file not found!, Please start Beta 1.7.3 once before installing!");
 		}
 
 		JsonObject mcJson = JsonParser.parseString(Utils.readString(vanillaJson)).getAsJsonObject();
@@ -94,9 +93,9 @@ public class ClientInstaller {
 		return json;
 	}
 
-	private static void createBRCJar(InputStream mc, InputStream brc, Path profileJar) throws IOException {
+	private static void createBRCJar(InputStream mc, InputStream brc, Path profileJar) {
 		File mcJar = Utils.createTempFile("temp_minecraft.jar", mc);
 		File recobbledJar = Utils.createTempFile("temp_recobbled.jar", brc);
-		Utils.createModdedMcJar(mcJar, recobbledJar, profileJar.toFile());
+		Utils.combinedJar(profileJar.toFile(), mcJar, recobbledJar);
 	}
 }

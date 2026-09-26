@@ -27,7 +27,7 @@ public class Main {
             String lafCls = UIManager.getSystemLookAndFeelClassName();
             UIManager.setLookAndFeel(lafCls);
 
-            if (lafCls.endsWith("AquaLookAndFeel")) { // patch osx tab text color bug JDK-8251377
+            if (lafCls.endsWith("AquaLookAndFeel")) {
                 UIManager.put("TabbedPane.foreground", Color.BLACK);
             }
         } catch (Exception ignored) {}
