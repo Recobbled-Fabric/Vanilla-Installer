@@ -23,7 +23,6 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
